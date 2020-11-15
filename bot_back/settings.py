@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'bw40_r424$v(kjm$p#!s1xu3-ho+i1yd@u@%^b9r^ji!u+l61^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['tseegiibotserver.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
