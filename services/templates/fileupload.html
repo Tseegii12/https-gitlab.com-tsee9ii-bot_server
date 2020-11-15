@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Файл upload хийх</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <form name="form" enctype="multipart/form-data" action="{% url 'import' %}" method="POST">
+        {% csrf_token %}
+        <div>
+            <input type="file" name="excel" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" placeholder="Файл сонгох"/>
+        </div>
+
+        <div>
+            <button type="submit">Хадгалах</button>
+        </div>
+    </form>
+</body>
+</html>
