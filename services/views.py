@@ -9,10 +9,6 @@ import openpyxl
 from services.models import Title, Data
 
 
-def index(request):
-    return HttpResponse("<h1>Hello</h1>")
-
-
 @csrf_exempt
 def search(request):
     if request.method == 'POST':
