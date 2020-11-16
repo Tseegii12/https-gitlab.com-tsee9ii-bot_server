@@ -9,6 +9,20 @@ import openpyxl
 from services.models import Title, Data
 
 
+def index(request):
+    dataObj = Data.objects.all()
+    contents = list()
+
+    for obj in dataObj:
+        data = list()
+        data.append(obj.article)
+        data.append(Title.objects.get(pk=obj.title_id).title)
+        data.append(obj.content)
+        contents.append(data)
+
+    return JsonResponse({ 'status_code': '200', 'data': contents })
+
+
 @csrf_exempt
 def search(request):
     if request.method == 'POST':
@@ -82,8 +96,6 @@ def excel_import(request):
             for cell in row:
                 row_data.append(str(cell.value))
             excel_data.append(row_data)
-
-        print(excel_data[0])
 
         saved_title = list()
         last_pk = 0

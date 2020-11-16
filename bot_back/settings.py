@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'bw40_r424$v(kjm$p#!s1xu3-ho+i1yd@u@%^b9r^ji!u+l61^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['tseegiibotserver.herokuapp.com', '127.0.0.1']
 
@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'bot_back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'heroku_0e05fc0f59674f7',
-        'USER': 'bab99890cec2a2',
-        'PASSWORD': '38a41847',
-        'HOST': 'eu-cdbr-west-03.cleardb.net',
+        'NAME': 'bvl7dqefrifi4m8d60tq',
+        'USER': 'u6vd2qumkdltotfs',
+        'PASSWORD': '7WWqKAguVr7YiSUjKZbt',
+        'HOST': 'bvl7dqefrifi4m8d60tq-mysql.services.clever-cloud.com',
         'POST': '3306'
     }
 }
