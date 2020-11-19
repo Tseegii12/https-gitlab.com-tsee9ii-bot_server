@@ -15,34 +15,28 @@ class ConvertToVector:
     def convert_count_vector(self, data):
         count_vec = CountVectorizer(stop_words=self.s_words)
 
-        count_data = count_vec.fit_transform(data)
+        count_data = count_vec.fit_transform(data).toarray()
 
         # pd.set_option("display.max_rows", None, "display.max_columns", None)
-        # cv_dataframe = pd.DataFrame(count_data.toarray(), columns=count_vec.get_feature_names())
+        # cv_dataframe = pd.DataFrame(count_data, columns=count_vec.get_feature_names())
         # print(cv_dataframe)
 
-        return count_data.toarray()
+        return count_data
 
     def convert_tfidf_vector(self, data):
         tfidf_vec = TfidfVectorizer(stop_words=self.s_words)
-        tfidf_data = tfidf_vec.fit_transform(data)
+        tfidf_data = tfidf_vec.fit_transform(data).toarray()
         # pd.set_option("display.max_rows", None, "display.max_columns", None)
         # tfidf_dataframe = pd.DataFrame(tfidf_data.toarray(), columns=tfidf_vec.get_feature_names())
         # print(tfidf_dataframe)
 
-        return tfidf_data.toarray()
+        return tfidf_data
 
     def cosine_similarity(self, user_vector, dic_vector):
         vector_sum = 0
-        vector_sqrt = 0
 
-        for i in range(len(user_vector)):
-            try:
-                vector_sum += user_vector[i] * dic_vector[i]
-                vector_sqrt = math.sqrt(sum(list_pow(user_vector, 2))) * math.sqrt(
-                    sum(list_pow(dic_vector, 2)))
-            except ValueError:
-                vector_sum += user_vector[i] * 0
+        vector_sqrt = math.sqrt(sum(list_pow(user_vector, 2))) * math.sqrt(sum(list_pow(dic_vector, 2)))
+        vector_sum = sum(user_vector * dic_vector)
 
         cosine_number = vector_sum / vector_sqrt
 

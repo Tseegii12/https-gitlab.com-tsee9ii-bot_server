@@ -10,17 +10,23 @@ from services.models import Title, Data
 
 
 def index(request):
-    dataObj = Data.objects.all()
-    contents = list()
+    if request.method == 'GET':
+        dataObj = Data.objects.all()
+        contents = list()
 
-    for obj in dataObj:
-        data = list()
-        data.append(obj.article)
-        data.append(Title.objects.get(pk=obj.title_id).title)
-        data.append(obj.content)
-        contents.append(data)
-
-    return JsonResponse({ 'status_code': '200', 'data': contents })
+        for obj in dataObj:
+            data = list()
+            data.append(obj.article)
+            data.append(Title.objects.get(pk=obj.title_id).title)
+            data.append(obj.content)
+            contents.append(data)
+        response = JsonResponse({'data': contents})
+        response.status_code = 200
+        return response
+    else:
+        response = JsonResponse()
+        response.status_code = 405
+        return response
 
 
 @csrf_exempt
@@ -29,41 +35,45 @@ def search(request):
         if request.body:
             body_unicode = request.body.decode('utf-8')
             body = json.loads(body_unicode)
-            question = body[0]['question']
+            question = body['question']
             stop_word = ['нь', 'энэ', 'бол', 'дэх']
+            user_input = question
+
             dataObj = Data.objects.all()
             contents = list()
+
             for obj in dataObj:
                 contents.append(obj.content)
 
             convertToVector = ConvertToVector(stop_word)
 
-            contents_vec = convertToVector.convert_tfidf_vector(contents)
+            # contents_vec = convertToVector.convert_tfidf_vector(contents)
 
-            user_input = question
             contents.append(user_input)
-            user_input_vec_c = convertToVector.convert_tfidf_vector(contents)
+            user_input_vec_c = convertToVector.convert_count_vector(contents)
 
             res = []
             max_cos = 0
 
-            for i in range(len(contents_vec)):
-                cosine_number = convertToVector.cosine_similarity(user_input_vec_c[len(user_input_vec_c) - 1],
-                                                                  user_input_vec_c[i])
-                if cosine_number > max_cos:
+            for i in range(len(user_input_vec_c) - 1):
+                cosine_number = convertToVector.cosine_similarity(user_input_vec_c[len(user_input_vec_c) - 1], user_input_vec_c[i])
+                if cosine_number >= max_cos:
                     max_cos = cosine_number
                     if len(res) == 0:
                         res.append(CosineResult(i, cosine_number))
                     else:
                         for obj in res:
-                            if obj.cosine_number <= cosine_number:
+                            if obj.cosine_number < cosine_number:
                                 obj.index = i
                                 obj.cosine_number = cosine_number
                             else:
                                 res.append(CosineResult(i, cosine_number))
 
+            print('max_cos: ', max_cos)
             if len(res) == 0:
-                return JsonResponse({'status_code': '204', 'message': 'Таны асуултанд тохирох хариулт олдсонгүй :('})
+                response = JsonResponse({'message': 'Таны асуултанд тохирох хариулт олдсонгүй :('})
+                response.status_code = 204
+                return response
             else:
                 answers = list()
                 for obj in res:
@@ -74,13 +84,18 @@ def search(request):
                     answer.append(title)
                     answer.append(data_obj.content)
                     answers.append(answer)
-                return JsonResponse({'status_code': '200', 'data': answers})
 
-            return JsonResponse({'status_code': '204'})
+                response = JsonResponse({'data': answers})
+                response.status_code = 200
+                return response
         else:
-            return JsonResponse({'status_code': '204', 'message': 'Өгөгдөл оруулна уу'})
-
-    return JsonResponse({'status_code': '204'})
+            response = JsonResponse({'message': 'Өгөгдөл оруулна уу'})
+            response.status_code = 400
+            return response
+    else:
+        response = JsonResponse()
+        response.status_code = 405
+        return response
 
 
 def excel_import(request):
@@ -101,10 +116,10 @@ def excel_import(request):
         last_pk = 0
         for data in excel_data:
             if len(saved_title) == 0:
-                saved_title.append(data[1])
                 title = Title.objects.create(title=data[1])
                 last_pk = title.id
                 new_data = Data.objects.create(article=data[0], title_id=last_pk, content=data[2])
+
             else:
                 saved = False
                 for title in saved_title:
@@ -117,7 +132,12 @@ def excel_import(request):
                     new_data = Data.objects.create(article=data[0], title_id=last_pk, content=data[2])
                 else:
                     new_data = Data.objects.create(article=data[0], title_id=last_pk, content=data[2])
-        messages.success(request, 'Амжилттай хадгаллаа')
-        return render(request, messages)
 
-    return render(request, 'fileupload.html')
+        messages.success(request, 'Амжилттай хадгаллаа')
+        return render(request, 'fileupload.html')
+    elif request.method == 'GET':
+        return render(request, 'fileupload.html')
+    else:
+        response = JsonResponse()
+        response.status_code = 405
+        return response
