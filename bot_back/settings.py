@@ -26,7 +26,8 @@ SECRET_KEY = 'bw40_r424$v(kjm$p#!s1xu3-ho+i1yd@u@%^b9r^ji!u+l61^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tseegiibotserver.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Application definition
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'bot_back.urls'
@@ -79,10 +82,10 @@ WSGI_APPLICATION = 'bot_back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bvl7dqefrifi4m8d60tq',
-        'USER': 'u6vd2qumkdltotfs',
-        'PASSWORD': '7WWqKAguVr7YiSUjKZbt',
-        'HOST': 'bvl7dqefrifi4m8d60tq-mysql.services.clever-cloud.com',
+        'NAME': 'bot_knowledge',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'POST': '3306'
     }
 }
@@ -125,5 +128,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
 
 STATIC_URL = '/static/'
