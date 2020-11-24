@@ -9,6 +9,7 @@ class Data(models.Model):
     article = models.CharField(max_length=30)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     content = models.CharField(max_length=1000)
+    data_id = models.IntegerField(null=True)
 
 
 class Question(models.Model):

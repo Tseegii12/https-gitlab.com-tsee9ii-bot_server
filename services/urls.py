@@ -5,4 +5,5 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'search', views.search, name='search'),
     url(r'import/data', views.excel_import, name="import"),
+    url(r'feedback', views.add_feedback, name="feedback")
 ]
