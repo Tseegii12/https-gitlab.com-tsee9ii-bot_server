@@ -61,6 +61,78 @@ def add_feedback(request):
 
 
 @csrf_exempt
+def title(request):
+    if request.method == 'POST':
+        if request.body:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+            try:
+                token = body['token']
+                question = body['question']
+                if token and question:
+                    stop_word = ['нь', 'энэ', 'бол', 'дэх', 'тухай', 'хүн']
+                    user_input = question
+
+                    dataObj = Title.objects.all()
+                    fullContents = list()
+                    contents = list()
+
+                    for obj in dataObj:
+                        data = {
+                            'id': obj.id,
+                            'title': obj.title,
+                        }
+                        fullContents.append(data)
+                        contents.append(obj.title)
+
+                    convertToVector = ConvertToVector(stop_word)
+
+                    contents.append(user_input)
+                    total_vec = convertToVector.convert_tfidf_vector(contents)
+
+                    res = []
+                    max_cos = 0
+
+                    user_vec = total_vec[len(total_vec) - 1]
+
+                    for i in range(len(total_vec) - 1):
+                        cosine_number = convertToVector.cosine_similarity(user_vec, total_vec[i])
+                        if cosine_number >= max_cos and cosine_number > 0:
+                            max_cos = cosine_number
+                            if len(res) == 0:
+                                res.append(CosineResult(i, cosine_number))
+                            else:
+                                res.append(CosineResult(i, cosine_number))
+                    if len(res) == 0:
+                        response = JsonResponse({'message': 'Таны асуултанд тохирох хариулт олдсонгүй :('})
+                        response.status_code = 204
+                        return response
+                    else:
+                        answers = list()
+                        res.sort(key=lambda c: c.cosine_number, reverse=True)
+                        for obj in res:
+                            answer = list()
+                            answer.append(fullContents[obj.index]['id'])
+                            answer.append(fullContents[obj.index]['title'])
+                            answers.append(answer)
+
+                        response = JsonResponse({'data': answers[0:5]})
+                        response.status_code = 200
+                        return response
+                else:
+                    response = JsonResponse({'message': 'Өгөгдөл оруулна уу'})
+                    response.status_code = 400
+                    return response
+            except Exception as e:
+                print(e)
+                response = JsonResponse({'message': 'Хүсэлт буруу байна'})
+                response.status_code = 401
+                return response
+    else:
+        return render(request, '405error.html')
+
+
+@csrf_exempt
 def search(request):
     if request.method == 'POST':
         if request.body:
@@ -70,7 +142,7 @@ def search(request):
                 token = body['token']
                 question = body['question']
                 if token and question:
-                    stop_word = ['нь', 'энэ', 'бол', 'дэх']
+                    stop_word = ['нь', 'энэ', 'бол', 'дэх', 'тухай', 'хүн']
                     user_input = question
 
                     dataObj = Data.objects.all()
@@ -83,6 +155,7 @@ def search(request):
                             'article': obj.article,
                             'title': Title.objects.get(pk=obj.title_id).title,
                             'content': obj.content,
+                            'data_id': obj.data_id
                         }
                         fullContents.append(data)
                         contents.append(obj.content)
@@ -114,11 +187,34 @@ def search(request):
                         res.sort(key=lambda c: c.cosine_number, reverse=True)
                         for obj in res:
                             answer = list()
-                            answer.append(fullContents[obj.index]['id'])
-                            answer.append(fullContents[obj.index]['article'])
-                            answer.append(fullContents[obj.index]['title'])
-                            answer.append(fullContents[obj.index]['content'])
-                            answers.append(answer)
+                            if fullContents[obj.index]['data_id'] is not None:
+                                sub = list()
+                                genDt = Data.objects.get(id=fullContents[obj.index]['data_id'])
+                                dt = Data.objects.filter(data_id=fullContents[obj.index]['data_id']).all()
+                                for obj in dt:
+                                    data = {
+                                        'id': obj.id,
+                                        'article': obj.article,
+                                        'title': Title.objects.get(pk=obj.title_id).title,
+                                        'content': obj.content,
+                                    }
+                                    sub.append(data)
+                                gnData = {
+                                    'id': genDt.id,
+                                    'article': genDt.article,
+                                    'title': Title.objects.get(pk=genDt.title_id).title,
+                                    'content': genDt.content,
+                                    'sub': sub
+                                }
+                                answers.append(gnData)
+                            else:
+                                resData = {
+                                    'id': fullContents[obj.index]['id'],
+                                    'article': fullContents[obj.index]['article'],
+                                    'title': fullContents[obj.index]['title'],
+                                    'content': fullContents[obj.index]['content'],
+                                }
+                                answers.append(resData)
 
                         response = JsonResponse({'data': answers[0:5]})
                         response.status_code = 200
@@ -128,6 +224,7 @@ def search(request):
                     response.status_code = 400
                     return response
             except Exception as e:
+                print(e)
                 response = JsonResponse({'message': 'Хүсэлт буруу байна'})
                 response.status_code = 401
                 return response
