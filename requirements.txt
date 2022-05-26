@@ -125,7 +125,7 @@ twilio==6.45.4
 typeguard==2.10.0
 typing-extensions==3.7.4.3
 tzlocal==2.1
-ujson==3.2.0
+ujson==5.2.0
 urllib3==1.25.11
 virtualenv==20.1.0
 virtualenv-clone==0.5.4
